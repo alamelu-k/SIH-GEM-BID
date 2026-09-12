@@ -1,0 +1,151 @@
+bidder_id,tender_number,archetype,requirement_code,mandatory,expected_result
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-PAN-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-GST-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-MSME-UDYAM-01,False,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-BIS-CERT-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-OEM-AUTH-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-MII-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-DEBAR-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-EMD-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-EXP-01,True,PASS
+Suryodaya Safety Systems Pvt Ltd,GEM/2026/B/SAFETY-001,Clean,REQ-TURNOVER-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-PAN-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-GST-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-MSME-UDYAM-01,False,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-BIS-CERT-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-OEM-AUTH-01,True,MISSING
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-MII-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-DEBAR-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-EMD-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-EXP-01,True,PASS
+Vendhar Fire Solutions,GEM/2026/B/SAFETY-001,Missing-doc,REQ-TURNOVER-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-PAN-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-GST-01,True,MISMATCH
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-MSME-UDYAM-01,False,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-BIS-CERT-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-OEM-AUTH-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-MII-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-DEBAR-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-EMD-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-EXP-01,True,PASS
+Kaveri PPE Traders,GEM/2026/B/SAFETY-001,Mismatch,REQ-TURNOVER-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-PAN-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-GST-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-MSME-UDYAM-01,False,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-BIS-CERT-01,True,FAIL
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-OEM-AUTH-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-MII-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-DEBAR-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-EMD-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-EXP-01,True,PASS
+Anbu Safety Equipments,GEM/2026/B/SAFETY-001,Expired-cert,REQ-TURNOVER-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-PAN-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-GST-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-MSME-UDYAM-01,False,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-BIS-CERT-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-OEM-AUTH-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-MII-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-DEBAR-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-EMD-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-EXP-01,True,PASS
+Thiruvalluvar Industrial Supplies,GEM/2026/B/SAFETY-001,Borderline,REQ-TURNOVER-01,True,MANUAL_REVIEW
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-PAN-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-GST-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-MSME-UDYAM-01,False,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-EXP-AMC-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-MANPOWER-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-EPFO-ESIC-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-SLA-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-DEBAR-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-EMD-01,True,PASS
+Nandhi Engineering Services,GEM/2026/S/AMC-002,Clean,REQ-TURNOVER-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-PAN-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-GST-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-MSME-UDYAM-01,False,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-EXP-AMC-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-MANPOWER-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-EPFO-ESIC-01,True,MISSING
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-SLA-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-DEBAR-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-EMD-01,True,PASS
+SPK Facility Management,GEM/2026/S/AMC-002,Missing-doc,REQ-TURNOVER-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-PAN-01,True,MISMATCH
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-GST-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-MSME-UDYAM-01,False,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-EXP-AMC-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-MANPOWER-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-EPFO-ESIC-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-SLA-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-DEBAR-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-EMD-01,True,PASS
+Muruga Technical Services,GEM/2026/S/AMC-002,Mismatch,REQ-TURNOVER-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-PAN-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-GST-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-MSME-UDYAM-01,False,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-EXP-AMC-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-MANPOWER-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-EPFO-ESIC-01,True,FAIL
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-SLA-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-DEBAR-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-EMD-01,True,PASS
+Coromandel Plant Services,GEM/2026/S/AMC-002,Expired-cert,REQ-TURNOVER-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-PAN-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-GST-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-MSME-UDYAM-01,False,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-EXP-AMC-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-MANPOWER-01,True,MANUAL_REVIEW
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-EPFO-ESIC-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-SLA-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-DEBAR-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-EMD-01,True,PASS
+Vetri Maintenance Co,GEM/2026/S/AMC-002,Borderline,REQ-TURNOVER-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-PAN-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-GST-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-UDYAM-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-MSE-CATEGORY-01,False,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-EMD-EXEMPT-01,False,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-L1-PREFERENCE-01,False,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-DEBAR-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-EXP-RELAXED-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-TURNOVER-RELAXED-01,True,PASS
+Amman Furniture Works,GEM/2026/B/MSME-003,Clean,REQ-QUALITY-CERT-01,False,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-PAN-01,True,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-GST-01,True,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-UDYAM-01,True,MISSING
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-MSE-CATEGORY-01,False,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-EMD-EXEMPT-01,False,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-L1-PREFERENCE-01,False,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-DEBAR-01,True,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-EXP-RELAXED-01,True,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-TURNOVER-RELAXED-01,True,PASS
+Sri Balaji Stationery Mart,GEM/2026/B/MSME-003,Missing-doc,REQ-QUALITY-CERT-01,False,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-PAN-01,True,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-GST-01,True,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-UDYAM-01,True,MISMATCH
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-MSE-CATEGORY-01,False,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-EMD-EXEMPT-01,False,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-L1-PREFERENCE-01,False,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-DEBAR-01,True,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-EXP-RELAXED-01,True,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-TURNOVER-RELAXED-01,True,PASS
+Lakshmi Office Interiors,GEM/2026/B/MSME-003,Mismatch,REQ-QUALITY-CERT-01,False,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-PAN-01,True,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-GST-01,True,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-UDYAM-01,True,FAIL
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-MSE-CATEGORY-01,False,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-EMD-EXEMPT-01,False,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-L1-PREFERENCE-01,False,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-DEBAR-01,True,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-EXP-RELAXED-01,True,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-TURNOVER-RELAXED-01,True,PASS
+Devi Furniture Fabricators,GEM/2026/B/MSME-003,Expired-cert,REQ-QUALITY-CERT-01,False,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-PAN-01,True,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-GST-01,True,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-UDYAM-01,True,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-MSE-CATEGORY-01,False,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-EMD-EXEMPT-01,False,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-L1-PREFERENCE-01,False,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-DEBAR-01,True,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-EXP-RELAXED-01,True,PASS
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-TURNOVER-RELAXED-01,True,MANUAL_REVIEW
+Ganesh Traders & Suppliers,GEM/2026/B/MSME-003,Borderline,REQ-QUALITY-CERT-01,False,PASS
