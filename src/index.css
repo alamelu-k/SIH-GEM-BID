@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-100/75 text-slate-800 font-sans tracking-tight;
+  }
+
+  /* Accessible focus outline for government systems */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-blue-600 ring-offset-1;
+  }
+}
+
+/* Custom styles for official synthetic data watermark */
+.synthetic-watermark {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(226, 232, 240, 0.35),
+    rgba(226, 232, 240, 0.35) 20px,
+    transparent 20px,
+    transparent 40px
+  );
+}
+
+/* Glassmorphism Card Utilities */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shadow-glow-accent {
+  box-shadow: 0 0 20px -3px rgba(56, 189, 248, 0.3);
+}
+
+.shadow-glow-emerald {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.3);
+}
+
+/* Print styles for Compliance Report */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+}
+
