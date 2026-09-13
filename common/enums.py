@@ -10,6 +10,7 @@ class DocumentType(str, Enum):
     EPFO_ESIC_CERTIFICATE = "epfo_esic_certificate"
     STARTUP_INDIA_CERTIFICATE = "startup_india_certificate"
     NSIC_CERTIFICATE = "nsic_certificate"
+    BIS_LICENSE = "bis_license"
     TENDER_PDF = "tender_pdf"
     UNKNOWN = "unknown"
 

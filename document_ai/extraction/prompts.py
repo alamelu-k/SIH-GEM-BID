@@ -10,6 +10,7 @@ EXPECTED_FIELDS: dict[DocumentType, list[str]] = {
     DocumentType.EPFO_ESIC_CERTIFICATE: ["legal_name", "establishment_code", "registration_date"],
     DocumentType.STARTUP_INDIA_CERTIFICATE: ["legal_name", "dpiit_number", "recognition_date"],
     DocumentType.NSIC_CERTIFICATE: ["legal_name", "nsic_registration_number", "validity_date"],
+    DocumentType.BIS_LICENSE: ["legal_name", "bis_license_number", "product_category", "valid_from", "valid_to", "status"],
 }
 
 _BASE_INSTRUCTIONS = """You are extracting structured fields from an Indian \
