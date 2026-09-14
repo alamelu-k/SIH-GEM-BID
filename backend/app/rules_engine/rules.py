@@ -120,6 +120,23 @@ class RuleEvaluator:
                     source_type=source_type
                 )
 
+            elif status_str == "MISMATCH":
+                return RuleEvaluationResult(
+                    requirement_id=requirement_id,
+                    rule_code=rule_code,
+                    requirement_title=title,
+                    mandatory=mandatory,
+                    status=RuleResultState.MISMATCH,
+                    severity=RuleSeverity.WARNING,
+                    reason=(
+                        f"Data/Identity Mismatch Detected via {source_name or 'official registry'}: "
+                        f"{verification_data.get('details') or 'Details do not match bidder identity'}."
+                    ),
+                    evidence_reference=f"Source: {source_name} | Status: MISMATCH",
+                    source_name=source_name,
+                    source_type=source_type
+                )
+
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
                 rule_code=rule_code,
