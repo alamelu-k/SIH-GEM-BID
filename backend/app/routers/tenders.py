@@ -1,10 +1,63 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any, Dict, List
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
 
+# Import identify_and_extract from tender_extraction
+_router_path = Path(__file__).resolve()
+_candidates = [
+    _router_path.parents[3] / "tender_extraction",
+    _router_path.parents[2] / "tender_extraction",
+]
+for _candidate in _candidates:
+    if _candidate.exists() and str(_candidate) not in sys.path:
+        sys.path.insert(0, str(_candidate))
+        break
+
+from identify_tender import identify_and_extract
+
 router = APIRouter(prefix="/tenders", tags=["Tenders & Requirements"])
+
+
+@router.post("/identify", status_code=status.HTTP_200_OK)
+def identify_tender(file: UploadFile = File(...)) -> Dict[str, Any]:
+    """
+    Identify a tender document from an uploaded PDF and extract its requirements.
+    Read-only operation: no database writes or persistent side effects.
+    """
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file must be a PDF."
+        )
+
+    temp_dir = tempfile.mkdtemp()
+    temp_path = Path(temp_dir) / file.filename
+    try:
+        with open(temp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        result = identify_and_extract(str(temp_path))
+        if not result.get("identified") and "PDF extraction failed" in result.get("reason", ""):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=result.get("reason")
+            )
+        return result
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing tender PDF: {str(exc)}"
+        ) from exc
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 @router.post("", response_model=schemas.TenderResponse, status_code=status.HTTP_201_CREATED)
