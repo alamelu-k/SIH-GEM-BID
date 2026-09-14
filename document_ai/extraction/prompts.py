@@ -11,6 +11,12 @@ EXPECTED_FIELDS: dict[DocumentType, list[str]] = {
     DocumentType.STARTUP_INDIA_CERTIFICATE: ["legal_name", "dpiit_number", "recognition_date"],
     DocumentType.NSIC_CERTIFICATE: ["legal_name", "nsic_registration_number", "validity_date"],
     DocumentType.BIS_LICENSE: ["legal_name", "bis_license_number", "product_category", "valid_from", "valid_to", "status"],
+    DocumentType.EMD_INSTRUMENT: ["legal_name", "instrument_type", "amount", "issuing_bank", "valid_until"],
+    DocumentType.EXPERIENCE_CERT: ["legal_name", "contract_description", "contract_value", "completion_date", "issuing_authority"],
+    DocumentType.MII_DECLARATION: ["legal_name", "declaration_date", "local_content_percentage", "supplier_class"],
+    DocumentType.MANPOWER_LIST: ["legal_name", "total_personnel", "designation", "certification"],
+    DocumentType.SLA_ACCEPTANCE: ["legal_name", "max_breakdown_response_time", "min_uptime_commitment", "sla_terms_accepted"],
+    DocumentType.QUALITY_CERT: ["legal_name", "standard", "certificate_number", "valid_until"],
 }
 
 _BASE_INSTRUCTIONS = """You are extracting structured fields from an Indian \

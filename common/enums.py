@@ -11,6 +11,12 @@ class DocumentType(str, Enum):
     STARTUP_INDIA_CERTIFICATE = "startup_india_certificate"
     NSIC_CERTIFICATE = "nsic_certificate"
     BIS_LICENSE = "bis_license"
+    EMD_INSTRUMENT = "emd_instrument"
+    EXPERIENCE_CERT = "experience_cert"
+    MII_DECLARATION = "mii_declaration"
+    MANPOWER_LIST = "manpower_list"
+    SLA_ACCEPTANCE = "sla_acceptance"
+    QUALITY_CERT = "quality_cert"
     TENDER_PDF = "tender_pdf"
     UNKNOWN = "unknown"
 
