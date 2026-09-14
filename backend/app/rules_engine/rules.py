@@ -1,3 +1,5 @@
+import datetime
+import re
 from typing import Dict, Any, Optional
 from app.rules_engine.types import RuleResultState, RuleSeverity, RuleEvaluationResult
 
@@ -259,4 +261,185 @@ class RuleEvaluator:
                 ),
                 source_name=source_name or "CPPP Central Blacklist Registry",
                 source_type=source_type
+            )
+
+    @staticmethod
+    def evaluate_expiry_date(
+        requirement_id: int,
+        rule_code: str,
+        title: str,
+        mandatory: bool,
+        expiry_date_str: Optional[str],
+        reference_date: Optional[datetime.date] = None,
+        source_name: Optional[str] = None,
+        clause_ref: Optional[str] = None
+    ) -> RuleEvaluationResult:
+        """
+        Category D: Evaluates whether an extracted document validity/expiry date is valid or expired.
+        """
+        if not expiry_date_str:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.MISSING if mandatory else RuleResultState.PASS,
+                severity=RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING,
+                reason=f"Validity/expiry date not found for '{title}'.",
+                evidence_reference=clause_ref,
+                source_name=source_name or "Document Verification"
+            )
+
+        ref_date = reference_date or datetime.date.today()
+
+        parsed_date = None
+        s = str(expiry_date_str).strip()
+        for fmt in ("%d-%b-%Y", "%d-%B-%Y", "%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d %b %Y", "%d %B %Y"):
+            try:
+                parsed_date = datetime.datetime.strptime(s, fmt).date()
+                break
+            except ValueError:
+                pass
+
+        if not parsed_date:
+            m = re.search(r"(\d{1,2})[-/ ]([A-Za-z]{3,9})[-/ ](\d{4})", s)
+            if m:
+                try:
+                    parsed_date = datetime.datetime.strptime(f"{m.group(1)}-{m.group(2)[:3]}-{m.group(3)}", "%d-%b-%Y").date()
+                except ValueError:
+                    pass
+
+        if not parsed_date:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.FAIL if mandatory else RuleResultState.PASS,
+                severity=RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING,
+                reason=f"Unparseable expiry date format: '{expiry_date_str}'.",
+                evidence_reference=clause_ref,
+                source_name=source_name or "Document Verification"
+            )
+
+        if parsed_date < ref_date:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.FAIL,
+                severity=RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING,
+                reason=f"Document expired on {expiry_date_str}.",
+                evidence_reference=f"Valid To: {expiry_date_str} | Reference Date: {ref_date}",
+                source_name=source_name or "Document Verification"
+            )
+        else:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.PASS,
+                severity=RuleSeverity.INFO,
+                reason=f"Document valid until {expiry_date_str}.",
+                evidence_reference=f"Valid To: {expiry_date_str} | Reference Date: {ref_date}",
+                source_name=source_name or "Document Verification"
+            )
+
+    @staticmethod
+    def evaluate_numeric_threshold(
+        requirement_id: int,
+        rule_code: str,
+        title: str,
+        mandatory: bool,
+        actual_value_str: Optional[str],
+        threshold_value: Any,
+        comparison: str = "gte",
+        verification_data: Optional[Dict[str, Any]] = None,
+        source_name: Optional[str] = None,
+        clause_ref: Optional[str] = None
+    ) -> RuleEvaluationResult:
+        """
+        Category E: Evaluates numeric thresholds with borderline tolerance support.
+        """
+        if verification_data and str(verification_data.get("status", "")).upper() == "MANUAL_REVIEW":
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.MANUAL_REVIEW,
+                severity=RuleSeverity.WARNING,
+                reason=f"Financial turnover requires manual verification: {verification_data.get('details') or 'Borderline/provisional figures'}.",
+                evidence_reference=clause_ref,
+                source_name=source_name or "Verification Connector"
+            )
+
+        def _parse_num(val):
+            if val is None:
+                return None
+            if isinstance(val, (int, float)):
+                return float(val)
+            s_val = str(val).strip()
+            m_lakh = re.search(r"([\d.]+)\s*(?:lakh|lakhs)", s_val, re.I)
+            if m_lakh:
+                return float(m_lakh.group(1)) * 100000.0
+            m_num = re.search(r"[\d,]+(?:\.\d+)?", s_val)
+            if m_num:
+                return float(m_num.group(0).replace(",", ""))
+            return None
+
+        actual_val = _parse_num(actual_value_str)
+        thresh_val = _parse_num(threshold_value)
+
+        if actual_val is None or thresh_val is None:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.PASS if not mandatory else RuleResultState.MISSING,
+                severity=RuleSeverity.INFO if not mandatory else RuleSeverity.WARNING,
+                reason=f"Numeric threshold could not be quantitatively verified ({actual_value_str}).",
+                evidence_reference=clause_ref,
+                source_name=source_name or "Financial Document Verification"
+            )
+
+        # Borderline check: within 10% below threshold
+        if 0.90 * thresh_val <= actual_val < thresh_val:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.MANUAL_REVIEW,
+                severity=RuleSeverity.WARNING,
+                reason=f"Borderline value ({actual_value_str}) within tolerance of threshold ({threshold_value}); requires officer review.",
+                evidence_reference=f"Submitted: {actual_value_str} | Threshold: {threshold_value}",
+                source_name=source_name or "Financial Document Verification"
+            )
+        elif actual_val >= thresh_val:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.PASS,
+                severity=RuleSeverity.INFO,
+                reason=f"Submitted value ({actual_value_str}) satisfies threshold ({threshold_value}).",
+                evidence_reference=f"Submitted: {actual_value_str} | Threshold: {threshold_value}",
+                source_name=source_name or "Financial Document Verification"
+            )
+        else:
+            return RuleEvaluationResult(
+                requirement_id=requirement_id,
+                rule_code=rule_code,
+                requirement_title=title,
+                mandatory=mandatory,
+                status=RuleResultState.FAIL,
+                severity=RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING,
+                reason=f"Submitted value ({actual_value_str}) fails to meet threshold ({threshold_value}).",
+                evidence_reference=f"Submitted: {actual_value_str} | Threshold: {threshold_value}",
+                source_name=source_name or "Financial Document Verification"
             )

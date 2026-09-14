@@ -106,6 +106,56 @@ class RulesEngine:
                     clause_ref=clause_ref
                 )
 
+            elif "TURNOVER" in code_upper:
+                # Category E: Threshold / Numeric Evaluation
+                f_doc = doc_type_map.get("FINANCIAL_STATEMENT")
+                actual_str = (
+                    f_doc.extracted_fields.get("turnover_amount")
+                    if f_doc and f_doc.extracted_fields
+                    else None
+                )
+                vr = v_results_map.get(req_id)
+                raw_resp = getattr(vr, "raw_response", {}) if vr else None
+                source_name = getattr(vr, "source_name", "Financial Document Verification")
+
+                eval_result = RuleEvaluator.evaluate_numeric_threshold(
+                    requirement_id=req_id,
+                    rule_code=code,
+                    title=title,
+                    mandatory=mandatory,
+                    actual_value_str=actual_str,
+                    threshold_value=getattr(req, "threshold_value", None),
+                    comparison="gte",
+                    verification_data=raw_resp,
+                    source_name=source_name,
+                    clause_ref=clause_ref
+                )
+
+            elif any(exp_term in code_upper for exp_term in ["BIS", "EMD"]):
+                # Category D: Expiry-Date Evaluation
+                matching_doc = None
+                date_str = None
+                if "BIS" in code_upper:
+                    matching_doc = doc_type_map.get("BIS_LICENSE")
+                    if matching_doc and matching_doc.extracted_fields:
+                        date_str = matching_doc.extracted_fields.get("valid_to")
+                elif "EMD" in code_upper:
+                    matching_doc = doc_type_map.get("EMD_INSTRUMENT")
+                    if matching_doc and matching_doc.extracted_fields:
+                        date_str = matching_doc.extracted_fields.get("valid_until")
+
+                source_name = getattr(matching_doc, "file_name", "Certificate / Document Verification") if matching_doc else "Document Verification"
+
+                eval_result = RuleEvaluator.evaluate_expiry_date(
+                    requirement_id=req_id,
+                    rule_code=code,
+                    title=title,
+                    mandatory=mandatory,
+                    expiry_date_str=date_str,
+                    source_name=source_name,
+                    clause_ref=clause_ref
+                )
+
             else:
                 # Mandatory Document Rule Fallback
                 matching_doc = None
