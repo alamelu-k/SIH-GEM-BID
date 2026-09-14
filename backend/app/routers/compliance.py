@@ -79,6 +79,33 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
         elif "DEBAR" in code_upper or "BLACK" in code_upper:
             claim_type = "DEBARMENT_CHECK"
 
+        elif "OEM" in code_upper:
+            claim_type = "OEM_AUTHORIZATION"
+
+        elif "TURNOVER" in code_upper:
+            claim_type = "FINANCIAL_TURNOVER"
+
+        elif "BIS" in code_upper:
+            claim_type = "BIS_CERTIFICATION"
+
+        elif "MII" in code_upper:
+            claim_type = "MII_DECLARATION"
+
+        elif "EXP" in code_upper:
+            claim_type = "EXPERIENCE_VERIFICATION"
+
+        elif "MANPOWER" in code_upper:
+            claim_type = "MANPOWER_VERIFICATION"
+
+        elif "EPFO" in code_upper or "ESIC" in code_upper:
+            claim_type = "EPFO_ESIC_VERIFICATION"
+
+        elif "SLA" in code_upper:
+            claim_type = "SLA_ACCEPTANCE"
+
+        elif "QUALITY" in code_upper:
+            claim_type = "QUALITY_CERTIFICATION"
+
         v_claim = VerificationClaim(
             requirement_code=req.code,
             claim_type=claim_type

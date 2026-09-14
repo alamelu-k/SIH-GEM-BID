@@ -27,7 +27,9 @@ INTEGRATION_DIR = REPO_ROOT / "integration"
 if not INTEGRATION_DIR.exists():
     INTEGRATION_DIR = Path.cwd() / "integration"
 
-GROUND_TRUTH_CSV_PATH = INTEGRATION_DIR / "full_ground_truth.csv"
+GROUND_TRUTH_CSV_PATH = REPO_ROOT / "full_ground_truth.csv"
+if not GROUND_TRUTH_CSV_PATH.exists():
+    GROUND_TRUTH_CSV_PATH = INTEGRATION_DIR / "full_ground_truth.csv"
 
 
 def check_api_health():
