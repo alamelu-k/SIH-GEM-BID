@@ -30,11 +30,17 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
             detail=f"Tender ID {bidder.tender_id} not found."
         )
 
-    requirements = db.query(models.Requirement).filter(models.Requirement.tender_id == tender.id).all()
-    documents = db.query(models.Document).filter(models.Document.bidder_id == bidder_id).all()
+    requirements = db.query(models.Requirement).filter(
+        models.Requirement.tender_id == tender.id
+    ).all()
+
+    documents = db.query(models.Document).filter(
+        models.Document.bidder_id == bidder_id
+    ).all()
 
     # Connector verification steps
     connector = MockVerificationConnector()
+
     identity = BidderIdentity(
         bidder_id=bidder.id,
         legal_name=bidder.legal_name,
@@ -44,21 +50,40 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
     )
 
     # Clean up previous verification results for this evaluation run
-    db.query(models.VerificationResult).filter(models.VerificationResult.bidder_id == bidder_id).delete()
+    db.query(models.VerificationResult).filter(
+        models.VerificationResult.bidder_id == bidder_id
+    ).delete()
+
     db.commit()
 
     verification_results = []
+
     for req in requirements:
         code_upper = req.code.upper()
+
         claim_type = "GENERAL_CLAIM"
-        if "GST" in code_upper:
+
+        # PAN verification
+        if "PAN" in code_upper:
+            claim_type = "PAN_VERIFICATION"
+
+        # GST verification
+        elif "GST" in code_upper:
             claim_type = "GST_FILING"
+
+        # MSME / UDYAM verification
         elif "MSME" in code_upper or "UDYAM" in code_upper:
             claim_type = "MSME_REGISTRATION"
+
+        # Debarment verification
         elif "DEBAR" in code_upper or "BLACK" in code_upper:
             claim_type = "DEBARMENT_CHECK"
 
-        v_claim = VerificationClaim(requirement_code=req.code, claim_type=claim_type)
+        v_claim = VerificationClaim(
+            requirement_code=req.code,
+            claim_type=claim_type
+        )
+
         v_resp = connector.verify(identity, v_claim)
 
         db_vr = models.VerificationResult(
@@ -68,13 +93,16 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
             source_type=v_resp.source_type.value,
             raw_response=v_resp.data
         )
+
         db.add(db_vr)
         db.commit()
         db.refresh(db_vr)
+
         verification_results.append(db_vr)
 
     # Run Rules Engine
     engine = RulesEngine()
+
     overall_status, counts, matrix = engine.evaluate_bidder_compliance(
         requirements=requirements,
         bidder=bidder,
@@ -83,9 +111,14 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
     )
 
     # Save or Update Compliance Score Record
-    existing_score = db.query(models.ComplianceScore).filter(models.ComplianceScore.bidder_id == bidder_id).first()
+    existing_score = db.query(models.ComplianceScore).filter(
+        models.ComplianceScore.bidder_id == bidder_id
+    ).first()
 
-    matrix_json = [m.model_dump() if hasattr(m, 'model_dump') else m.dict() for m in matrix]
+    matrix_json = [
+        m.model_dump() if hasattr(m, "model_dump") else m.dict()
+        for m in matrix
+    ]
 
     if existing_score:
         existing_score.overall_status = overall_status
@@ -95,7 +128,9 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
         existing_score.mismatch_count = counts["mismatch_count"]
         existing_score.manual_review_count = counts["manual_review_count"]
         existing_score.matrix_results = matrix_json
+
         db_score = existing_score
+
     else:
         db_score = models.ComplianceScore(
             bidder_id=bidder_id,
@@ -108,6 +143,7 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
             manual_review_count=counts["manual_review_count"],
             matrix_results=matrix_json
         )
+
         db.add(db_score)
 
     db.commit()
@@ -126,21 +162,35 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
             "failed": counts["failed_count"]
         }
     )
+
     db.add(audit)
     db.commit()
 
     return db_score
 
 
-@router.get("/bidder/{bidder_id}", response_model=schemas.ComplianceScoreResponse)
-def get_bidder_compliance(bidder_id: int, db: Session = Depends(get_db)):
+@router.get(
+    "/bidder/{bidder_id}",
+    response_model=schemas.ComplianceScoreResponse
+)
+def get_bidder_compliance(
+    bidder_id: int,
+    db: Session = Depends(get_db)
+):
     """
     Get the compliance evaluation score matrix for a specific bidder.
     """
-    score = db.query(models.ComplianceScore).filter(models.ComplianceScore.bidder_id == bidder_id).first()
+    score = db.query(models.ComplianceScore).filter(
+        models.ComplianceScore.bidder_id == bidder_id
+    ).first()
+
     if not score:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Compliance score not found for Bidder ID {bidder_id}. Run /evaluate/{bidder_id} first."
+            detail=(
+                f"Compliance score not found for Bidder ID {bidder_id}. "
+                f"Run /evaluate/{bidder_id} first."
+            )
         )
+
     return score

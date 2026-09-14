@@ -1,11 +1,12 @@
 from typing import Dict, Any, Optional
 from app.rules_engine.types import RuleResultState, RuleSeverity, RuleEvaluationResult
 
+
 class RuleEvaluator:
     """
     Base evaluator class for individual procurement rules.
     """
-    
+
     @staticmethod
     def evaluate_mandatory_document(
         requirement_id: int,
@@ -31,6 +32,7 @@ class RuleEvaluator:
         else:
             status = RuleResultState.MISSING
             severity = RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING
+
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
                 rule_code=rule_code,
@@ -69,7 +71,11 @@ class RuleEvaluator:
             )
 
         status_str = str(verification_data.get("status", "")).upper()
-        verified = verification_data.get("verified", False) or status_str in ["ACTIVE", "VERIFIED", "REGULAR", "PERPETUAL"]
+
+        verified = (
+            verification_data.get("verified", False)
+            or status_str in ["ACTIVE", "VERIFIED", "REGULAR", "PERPETUAL"]
+        )
 
         if verified:
             return RuleEvaluationResult(
@@ -80,20 +86,38 @@ class RuleEvaluator:
                 status=RuleResultState.PASS,
                 severity=RuleSeverity.INFO,
                 reason=f"Successfully verified via {source_name or 'official portal'}.",
-                evidence_reference=f"Source: {source_name} | Payload: {verification_data.get('gstin') or verification_data.get('udyam_number') or 'OK'}",
+                evidence_reference=(
+                    f"Source: {source_name} | Payload: "
+                    f"{verification_data.get('gstin') or verification_data.get('udyam_number') or 'OK'}"
+                ),
                 source_name=source_name,
                 source_type=source_type
             )
+
         else:
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
                 rule_code=rule_code,
                 requirement_title=title,
                 mandatory=mandatory,
-                status=RuleResultState.FAIL,
+
+                # FIX:
+                # Failed optional requirements should not disqualify the bidder.
+                status=(
+                    RuleResultState.FAIL
+                    if mandatory
+                    else RuleResultState.PASS
+                ),
+
                 severity=RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING,
-                reason=f"Verification failed at {source_name or 'source'}: {verification_data.get('details') or 'Invalid/Inactive status'}.",
-                evidence_reference=f"Source: {source_name} | Error: {verification_data.get('details') or 'Status Failure'}",
+                reason=(
+                    f"Verification failed at {source_name or 'source'}: "
+                    f"{verification_data.get('details') or 'Invalid/Inactive status'}."
+                ),
+                evidence_reference=(
+                    f"Source: {source_name} | Error: "
+                    f"{verification_data.get('details') or 'Status Failure'}"
+                ),
                 source_name=source_name,
                 source_type=source_type
             )
@@ -117,7 +141,7 @@ class RuleEvaluator:
                 mandatory=mandatory,
                 status=RuleResultState.MANUAL_REVIEW,
                 severity=RuleSeverity.WARNING,
-                reason=f"Verified legal name not returned by source for cross-matching.",
+                reason="Verified legal name not returned by source for cross-matching.",
                 source_name=source_name,
                 source_type=source_type
             )
@@ -125,7 +149,11 @@ class RuleEvaluator:
         clean_claimed = "".join(claimed_name.upper().split())
         clean_verified = "".join(verified_name.upper().split())
 
-        if clean_claimed == clean_verified or clean_claimed in clean_verified or clean_verified in clean_claimed:
+        if (
+            clean_claimed == clean_verified
+            or clean_claimed in clean_verified
+            or clean_verified in clean_claimed
+        ):
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
                 rule_code=rule_code,
@@ -133,11 +161,17 @@ class RuleEvaluator:
                 mandatory=mandatory,
                 status=RuleResultState.PASS,
                 severity=RuleSeverity.INFO,
-                reason=f"Bidder legal name ('{claimed_name}') matches verified portal record ('{verified_name}').",
-                evidence_reference=f"Claimed: {claimed_name} | Verified: {verified_name}",
+                reason=(
+                    f"Bidder legal name ('{claimed_name}') matches "
+                    f"verified portal record ('{verified_name}')."
+                ),
+                evidence_reference=(
+                    f"Claimed: {claimed_name} | Verified: {verified_name}"
+                ),
                 source_name=source_name,
                 source_type=source_type
             )
+
         else:
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
@@ -146,8 +180,13 @@ class RuleEvaluator:
                 mandatory=mandatory,
                 status=RuleResultState.MISMATCH,
                 severity=RuleSeverity.WARNING,
-                reason=f"Name Mismatch Detected: Submitted name '{claimed_name}' differs from official registry name '{verified_name}'.",
-                evidence_reference=f"Submitted: '{claimed_name}' vs Official: '{verified_name}'",
+                reason=(
+                    f"Name Mismatch Detected: Submitted name '{claimed_name}' "
+                    f"differs from official registry name '{verified_name}'."
+                ),
+                evidence_reference=(
+                    f"Submitted: '{claimed_name}' vs Official: '{verified_name}'"
+                ),
                 source_name=source_name,
                 source_type=source_type
             )
@@ -171,11 +210,18 @@ class RuleEvaluator:
                 mandatory=True,
                 status=RuleResultState.FAIL,
                 severity=RuleSeverity.CRITICAL,
-                reason=f"CRITICAL DISQUALIFICATION: Bidder is listed on government debarment/blacklist database ({details or 'Debarred'}).",
-                evidence_reference=f"Debarment DB Check: MATCH FOUND ({source_name})",
+                reason=(
+                    f"CRITICAL DISQUALIFICATION: Bidder is listed on "
+                    f"government debarment/blacklist database "
+                    f"({details or 'Debarred'})."
+                ),
+                evidence_reference=(
+                    f"Debarment DB Check: MATCH FOUND ({source_name})"
+                ),
                 source_name=source_name or "CPPP Central Blacklist Registry",
                 source_type=source_type
             )
+
         else:
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
@@ -185,7 +231,9 @@ class RuleEvaluator:
                 status=RuleResultState.PASS,
                 severity=RuleSeverity.INFO,
                 reason="Clean Record: No debarment or blacklisting records found.",
-                evidence_reference=f"Debarment DB Check: CLEAR ({source_name})",
+                evidence_reference=(
+                    f"Debarment DB Check: CLEAR ({source_name})"
+                ),
                 source_name=source_name or "CPPP Central Blacklist Registry",
                 source_type=source_type
             )
