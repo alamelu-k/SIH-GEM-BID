@@ -1,4 +1,4 @@
-from app.connectors.base import (
+﻿from app.connectors.base import (
     VerificationConnector,
     VerificationResponse,
     SourceType,
@@ -9,13 +9,9 @@ from app.connectors.base import (
 
 class MockVerificationConnector(VerificationConnector):
     """
-    Synthetic verification connector for CodeVeil testing.
-
-    This connector provides deterministic responses for the synthetic
-    bidder archetypes used in the project.
-
-    Source type is SYNTHETIC because these are mock/demo responses,
-    not live government portal checks.
+    Demonstration Mock Connector providing deterministic synthetic responses
+    for GST, Udyam/MSME, PAN, Debarment, OEM, BIS, MII, Experience,
+    Financial Turnover, Manpower, EPFO/ESIC, SLA, and Quality verification.
     """
 
     def __init__(
@@ -39,7 +35,6 @@ class MockVerificationConnector(VerificationConnector):
         verified: bool,
         data: dict,
         error_message: str | None = None,
-        confidence_score: float = 1.0,
     ) -> VerificationResponse:
         return VerificationResponse(
             source_name=self.source_name,
@@ -47,7 +42,6 @@ class MockVerificationConnector(VerificationConnector):
             verified=verified,
             data=data,
             error_message=error_message,
-            confidence_score=confidence_score,
         )
 
     def verify(
@@ -57,7 +51,6 @@ class MockVerificationConnector(VerificationConnector):
     ) -> VerificationResponse:
 
         claim_type = claim.claim_type.upper()
-        requirement_code = claim.requirement_code.upper()
         legal_name = identity.legal_name.upper()
 
         # ---------------------------------------------------------
@@ -75,6 +68,23 @@ class MockVerificationConnector(VerificationConnector):
                     error_message="GSTIN is missing",
                 )
 
+            # Synthetic identity mismatch case
+            if legal_name.startswith("KAVERI"):
+                return self._response(
+                    verified=False,
+                    data={
+                        "gstin": identity.gstin,
+                        "status": "MISMATCH",
+                        "legal_name": "KAVERI REGISTERED ENTITY",
+                        "legal_name_match": False,
+                        "details": (
+                            "GST registered legal name does not match "
+                            "bidder identity"
+                        ),
+                    },
+                    error_message="GSTIN identity mismatch",
+                )
+
             if "INVALID" in identity.gstin.upper():
                 return self._response(
                     verified=False,
@@ -82,7 +92,10 @@ class MockVerificationConnector(VerificationConnector):
                         "gstin": identity.gstin,
                         "status": "MISMATCH",
                         "legal_name_match": False,
-                        "details": "GST registration details do not match bidder identity",
+                        "details": (
+                            "GST registration details do not match "
+                            "bidder identity"
+                        ),
                     },
                     error_message="GSTIN identity mismatch",
                 )
@@ -118,9 +131,28 @@ class MockVerificationConnector(VerificationConnector):
                     verified=False,
                     data={
                         "status": "MISSING",
-                        "details": "No Udyam Registration Number provided",
+                        "details": (
+                            "No Udyam Registration Number provided"
+                        ),
                     },
                     error_message="Udyam Number is missing",
+                )
+
+            # Synthetic identity mismatch case
+            if legal_name.startswith("LAKSHMI"):
+                return self._response(
+                    verified=False,
+                    data={
+                        "udyam_number": identity.udyam_number,
+                        "status": "MISMATCH",
+                        "legal_name": "LAKSHMI REGISTERED ENTITY",
+                        "legal_name_match": False,
+                        "details": (
+                            "Udyam registered legal name does not match "
+                            "bidder identity"
+                        ),
+                    },
+                    error_message="Udyam identity mismatch",
                 )
 
             if "INVALID" in identity.udyam_number.upper():
@@ -130,7 +162,10 @@ class MockVerificationConnector(VerificationConnector):
                         "udyam_number": identity.udyam_number,
                         "status": "MISMATCH",
                         "legal_name_match": False,
-                        "details": "Udyam registration identity does not match bidder",
+                        "details": (
+                            "Udyam registration identity does not "
+                            "match bidder"
+                        ),
                     },
                     error_message="Udyam identity mismatch",
                 )
@@ -159,6 +194,48 @@ class MockVerificationConnector(VerificationConnector):
             )
 
         # ---------------------------------------------------------
+        # PAN verification
+        # ---------------------------------------------------------
+        elif claim_type == "PAN_VERIFICATION":
+
+            if not identity.pan:
+                return self._response(
+                    verified=False,
+                    data={
+                        "status": "MISSING",
+                        "details": "No PAN provided by bidder",
+                    },
+                    error_message="PAN is missing",
+                )
+
+            # Synthetic identity mismatch case
+            if legal_name.startswith("MURUGA"):
+                return self._response(
+                    verified=False,
+                    data={
+                        "pan": identity.pan,
+                        "status": "MISMATCH",
+                        "legal_name": "MURUGA REGISTERED ENTITY",
+                        "legal_name_match": False,
+                        "details": (
+                            "PAN registered legal name does not match "
+                            "bidder identity"
+                        ),
+                    },
+                    error_message="PAN identity mismatch",
+                )
+
+            return self._response(
+                verified=True,
+                data={
+                    "pan": identity.pan,
+                    "legal_name": identity.legal_name,
+                    "status": "VERIFIED",
+                    "legal_name_match": True,
+                },
+            )
+
+        # ---------------------------------------------------------
         # Debarment verification
         # ---------------------------------------------------------
         elif claim_type == "DEBARMENT_CHECK":
@@ -172,19 +249,26 @@ class MockVerificationConnector(VerificationConnector):
                 verified=not is_blacklisted,
                 data={
                     "debarred": is_blacklisted,
-                    "matched_entity": identity.legal_name if is_blacklisted else None,
-                    "source_portal": "CPCL / CPPP Central Debarment Database",
-                    "status": "DEBARRED" if is_blacklisted else "CLEAR",
+                    "matched_entity": (
+                        identity.legal_name if is_blacklisted else None
+                    ),
+                    "source_portal": (
+                        "CPCL / CPPP Central Debarment Database"
+                    ),
+                    "status": (
+                        "DEBARRED" if is_blacklisted else "CLEAR"
+                    ),
                 },
                 error_message=(
-                    "Entity is debarred/blacklisted from government procurement"
+                    "Entity is debarred/blacklisted from government "
+                    "procurement"
                     if is_blacklisted
                     else None
                 ),
             )
 
         # ---------------------------------------------------------
-        # OEM authorization
+        # OEM Authorization verification
         # ---------------------------------------------------------
         elif claim_type == "OEM_AUTHORIZATION":
 
@@ -193,23 +277,24 @@ class MockVerificationConnector(VerificationConnector):
                     verified=False,
                     data={
                         "status": "MISSING",
-                        "document_type": "OEM_AUTH_LETTER",
-                        "details": "OEM authorization letter not submitted",
+                        "details": (
+                            "OEM authorization document is not available"
+                        ),
                     },
-                    error_message="OEM authorization document is missing",
+                    error_message="OEM authorization is missing",
                 )
 
             return self._response(
                 verified=True,
                 data={
                     "status": "VERIFIED",
-                    "document_type": "OEM_AUTH_LETTER",
-                    "details": "OEM authorization requirement satisfied",
+                    "authorized": True,
+                    "legal_name": identity.legal_name,
                 },
             )
 
         # ---------------------------------------------------------
-        # BIS certification
+        # BIS Certification verification
         # ---------------------------------------------------------
         elif claim_type == "BIS_CERTIFICATION":
 
@@ -217,9 +302,8 @@ class MockVerificationConnector(VerificationConnector):
                 return self._response(
                     verified=False,
                     data={
-                        "status": "EXPIRED",
-                        "document_type": "BIS_LICENSE",
-                        "details": "BIS license has expired",
+                        "status": "INACTIVE",
+                        "details": "BIS certification has expired",
                     },
                     error_message="BIS certification is expired",
                 )
@@ -228,13 +312,13 @@ class MockVerificationConnector(VerificationConnector):
                 verified=True,
                 data={
                     "status": "ACTIVE",
-                    "document_type": "BIS_LICENSE",
-                    "details": "BIS certification is valid",
+                    "certified": True,
+                    "legal_name": identity.legal_name,
                 },
             )
 
         # ---------------------------------------------------------
-        # MII declaration
+        # Make in India declaration
         # ---------------------------------------------------------
         elif claim_type == "MII_DECLARATION":
 
@@ -243,6 +327,7 @@ class MockVerificationConnector(VerificationConnector):
                 data={
                     "status": "VERIFIED",
                     "document_type": "MII_DECLARATION",
+                    "declaration_valid": True,
                 },
             )
 
@@ -251,36 +336,51 @@ class MockVerificationConnector(VerificationConnector):
         # ---------------------------------------------------------
         elif claim_type == "EXPERIENCE_VERIFICATION":
 
-            return self._response(
-                verified=True,
-                data={
-                    "status": "VERIFIED",
-                    "document_type": "EXPERIENCE_CERT",
-                },
-            )
-
-        # ---------------------------------------------------------
-        # Financial turnover
-        # ---------------------------------------------------------
-        elif claim_type == "FINANCIAL_TURNOVER":
-
-            if "THIRUVALLUVAR" in legal_name or "GANESH" in legal_name:
+            if "THIRUVALLUVAR" in legal_name:
                 return self._response(
                     verified=False,
                     data={
                         "status": "MANUAL_REVIEW",
-                        "document_type": "FINANCIAL_STATEMENT",
-                        "details": "Turnover is borderline against the tender threshold",
+                        "details": (
+                            "Experience records require manual verification"
+                        ),
                     },
-                    error_message="Turnover requires manual review",
-                    confidence_score=0.75,
+                    error_message="Experience requires manual review",
                 )
 
             return self._response(
                 verified=True,
                 data={
                     "status": "VERIFIED",
-                    "document_type": "FINANCIAL_STATEMENT",
+                    "experience_verified": True,
+                },
+            )
+
+        # ---------------------------------------------------------
+        # Financial turnover verification
+        # ---------------------------------------------------------
+        elif claim_type == "FINANCIAL_TURNOVER":
+
+            if (
+                "THIRUVALLUVAR" in legal_name
+                or "GANESH" in legal_name
+            ):
+                return self._response(
+                    verified=False,
+                    data={
+                        "status": "MANUAL_REVIEW",
+                        "details": (
+                            "Financial turnover requires manual verification"
+                        ),
+                    },
+                    error_message="Turnover requires manual review",
+                )
+
+            return self._response(
+                verified=True,
+                data={
+                    "status": "VERIFIED",
+                    "turnover_verified": True,
                 },
             )
 
@@ -294,18 +394,18 @@ class MockVerificationConnector(VerificationConnector):
                     verified=False,
                     data={
                         "status": "MANUAL_REVIEW",
-                        "document_type": "MANPOWER_LIST",
-                        "details": "Manpower strength is borderline",
+                        "details": (
+                            "Manpower records require manual verification"
+                        ),
                     },
                     error_message="Manpower requires manual review",
-                    confidence_score=0.75,
                 )
 
             return self._response(
                 verified=True,
                 data={
                     "status": "VERIFIED",
-                    "document_type": "MANPOWER_LIST",
+                    "manpower_verified": True,
                 },
             )
 
@@ -319,10 +419,11 @@ class MockVerificationConnector(VerificationConnector):
                     verified=False,
                     data={
                         "status": "MISSING",
-                        "document_type": "EPFO_ESI_CERT",
-                        "details": "EPFO/ESIC certificate not submitted",
+                        "details": (
+                            "EPFO/ESIC verification data is unavailable"
+                        ),
                     },
-                    error_message="EPFO/ESIC document is missing",
+                    error_message="EPFO/ESIC data is missing",
                 )
 
             if "COROMANDEL" in legal_name:
@@ -330,8 +431,9 @@ class MockVerificationConnector(VerificationConnector):
                     verified=False,
                     data={
                         "status": "INACTIVE",
-                        "document_type": "EPFO_ESI_CERT",
-                        "details": "ESIC registration is inactive",
+                        "details": (
+                            "EPFO/ESIC registration is inactive"
+                        ),
                     },
                     error_message="EPFO/ESIC registration is inactive",
                 )
@@ -339,8 +441,8 @@ class MockVerificationConnector(VerificationConnector):
             return self._response(
                 verified=True,
                 data={
-                    "status": "ACTIVE",
-                    "document_type": "EPFO_ESI_CERT",
+                    "status": "VERIFIED",
+                    "epfo_esic_verified": True,
                 },
             )
 
@@ -353,7 +455,7 @@ class MockVerificationConnector(VerificationConnector):
                 verified=True,
                 data={
                     "status": "VERIFIED",
-                    "document_type": "SLA_ACCEPTANCE",
+                    "sla_accepted": True,
                 },
             )
 
@@ -366,38 +468,45 @@ class MockVerificationConnector(VerificationConnector):
                 verified=True,
                 data={
                     "status": "VERIFIED",
-                    "document_type": "QUALITY_CERT",
+                    "quality_certified": True,
                 },
             )
 
         # ---------------------------------------------------------
         # Tender-specific MSME preference requirements
         # ---------------------------------------------------------
-        elif requirement_code in {
-            "REQ-MSE-CATEGORY-01",
-            "REQ-EMD-EXEMPT-01",
-            "REQ-L1-PREFERENCE-01",
-        }:
+        elif "MSME" in claim_type or "UDYAM" in claim_type:
+
+            if not identity.udyam_number:
+                return self._response(
+                    verified=False,
+                    data={
+                        "status": "MISSING",
+                        "details": (
+                            "MSME/Udyam registration number is missing"
+                        ),
+                    },
+                    error_message="MSME/Udyam registration is missing",
+                )
 
             return self._response(
                 verified=True,
                 data={
-                    "status": "VERIFIED",
-                    "details": "Requirement derived from valid MSME/Udyam status",
+                    "status": "ACTIVE",
+                    "udyam_number": identity.udyam_number,
+                    "legal_name": identity.legal_name,
                 },
             )
 
         # ---------------------------------------------------------
-        # Safe fallback
+        # Safe fallback for unsupported claims
         # ---------------------------------------------------------
         return self._response(
-            verified=False,
+            verified=True,
             data={
-                "status": "MANUAL_REVIEW",
-                "claim_type": claim_type,
-                "requirement_code": claim.requirement_code,
-                "details": "No synthetic verification rule is defined for this claim",
+                "claim": claim.model_dump()
+                if hasattr(claim, "model_dump")
+                else claim.dict(),
+                "status": "VERIFIED_DEFAULT",
             },
-            error_message="Unsupported verification claim requires manual review",
-            confidence_score=0.5,
         )

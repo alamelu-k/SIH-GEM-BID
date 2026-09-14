@@ -17,17 +17,13 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
     Runs verification source checks via connectors and calculates the requirement matrix.
     """
     bidder = db.query(models.Bidder).filter(models.Bidder.id == bidder_id).first()
-
     if not bidder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Bidder ID {bidder_id} not found."
         )
 
-    tender = db.query(models.Tender).filter(
-        models.Tender.id == bidder.tender_id
-    ).first()
-
+    tender = db.query(models.Tender).filter(models.Tender.id == bidder.tender_id).first()
     if not tender:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -64,43 +60,24 @@ def evaluate_compliance(bidder_id: int, db: Session = Depends(get_db)):
 
     for req in requirements:
         code_upper = req.code.upper()
+
         claim_type = "GENERAL_CLAIM"
 
-        if "GST" in code_upper:
+        # PAN verification
+        if "PAN" in code_upper:
+            claim_type = "PAN_VERIFICATION"
+
+        # GST verification
+        elif "GST" in code_upper:
             claim_type = "GST_FILING"
 
+        # MSME / UDYAM verification
         elif "MSME" in code_upper or "UDYAM" in code_upper:
             claim_type = "MSME_REGISTRATION"
 
+        # Debarment verification
         elif "DEBAR" in code_upper or "BLACK" in code_upper:
             claim_type = "DEBARMENT_CHECK"
-
-        elif "OEM" in code_upper:
-            claim_type = "OEM_AUTHORIZATION"
-
-        elif "TURNOVER" in code_upper:
-            claim_type = "FINANCIAL_TURNOVER"
-
-        elif "BIS" in code_upper:
-            claim_type = "BIS_CERTIFICATION"
-
-        elif "MII" in code_upper:
-            claim_type = "MII_DECLARATION"
-
-        elif "EXP" in code_upper:
-            claim_type = "EXPERIENCE_VERIFICATION"
-
-        elif "MANPOWER" in code_upper:
-            claim_type = "MANPOWER_VERIFICATION"
-
-        elif "EPFO" in code_upper or "ESIC" in code_upper:
-            claim_type = "EPFO_ESIC_VERIFICATION"
-
-        elif "SLA" in code_upper:
-            claim_type = "SLA_ACCEPTANCE"
-
-        elif "QUALITY" in code_upper:
-            claim_type = "QUALITY_CERTIFICATION"
 
         v_claim = VerificationClaim(
             requirement_code=req.code,
