@@ -137,6 +137,23 @@ class RuleEvaluator:
                     source_type=source_type
                 )
 
+            elif status_str == "MANUAL_REVIEW":
+                return RuleEvaluationResult(
+                    requirement_id=requirement_id,
+                    rule_code=rule_code,
+                    requirement_title=title,
+                    mandatory=mandatory,
+                    status=RuleResultState.MANUAL_REVIEW,
+                    severity=RuleSeverity.WARNING,
+                    reason=(
+                        f"Manual verification required at {source_name or 'source'}: "
+                        f"{verification_data.get('details') or 'Requires human review'}."
+                    ),
+                    evidence_reference=f"Source: {source_name} | Status: MANUAL_REVIEW",
+                    source_name=source_name,
+                    source_type=source_type
+                )
+
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
                 rule_code=rule_code,

@@ -88,7 +88,7 @@ class RulesEngine:
                     source_type=source_type
                 )
 
-            elif "PAN" in code_upper or "GST" in code_upper or "MSME" in code_upper or "UDYAM" in code_upper or "STATUTORY" in code_upper:
+            elif "PAN" in code_upper or "GST" in code_upper or "MSME" in code_upper or "UDYAM" in code_upper or "STATUTORY" in code_upper or "EPFO" in code_upper or "ESIC" in code_upper or "MANPOWER" in code_upper:
                 # Statutory Verification Rule
                 vr = v_results_map.get(req_id)
                 raw_resp = getattr(vr, "raw_response", {}) if vr else None

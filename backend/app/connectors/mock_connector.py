@@ -1,4 +1,4 @@
-﻿from app.connectors.base import (
+from app.connectors.base import (
     VerificationConnector,
     VerificationResponse,
     SourceType,
@@ -168,6 +168,17 @@ class MockVerificationConnector(VerificationConnector):
                         ),
                     },
                     error_message="Udyam identity mismatch",
+                )
+
+            if legal_name.startswith("DEVI"):
+                return self._response(
+                    verified=False,
+                    data={
+                        "udyam_number": identity.udyam_number,
+                        "status": "INACTIVE",
+                        "registration_status": "CANCELLED",
+                    },
+                    error_message="Udyam registration is inactive/cancelled",
                 )
 
             if "CANCELLED" in identity.udyam_number.upper():
