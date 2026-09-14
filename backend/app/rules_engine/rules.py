@@ -95,6 +95,29 @@ class RuleEvaluator:
             )
 
         else:
+            if status_str == "MISSING":
+                return RuleEvaluationResult(
+                    requirement_id=requirement_id,
+                    rule_code=rule_code,
+                    requirement_title=title,
+                    mandatory=mandatory,
+                    status=(
+                        RuleResultState.MISSING
+                        if mandatory
+                        else RuleResultState.PASS
+                    ),
+                    severity=RuleSeverity.CRITICAL if mandatory else RuleSeverity.WARNING,
+                    reason=(
+                        f"Required verification data missing at {source_name or 'source'}: "
+                        f"{verification_data.get('details') or 'Not provided'}."
+                    ),
+                    evidence_reference=(
+                        f"Source: {source_name} | Status: MISSING"
+                    ),
+                    source_name=source_name,
+                    source_type=source_type
+                )
+
             return RuleEvaluationResult(
                 requirement_id=requirement_id,
                 rule_code=rule_code,

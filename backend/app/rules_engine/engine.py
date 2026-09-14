@@ -109,13 +109,42 @@ class RulesEngine:
             else:
                 # Mandatory Document Rule Fallback
                 matching_doc = None
-                for doc_type, doc_obj in doc_type_map.items():
-                    if any(k in doc_type for k in ["CERT", "DOC", "STATEMENT", "PROOF", "AUTH"]):
-                        matching_doc = doc_obj
+                doc_type_mapping = {
+                    "OEM": ["OEM", "AUTH"],
+                    "EPFO": ["EPFO", "ESI"],
+                    "ESIC": ["EPFO", "ESI"],
+                    "BIS": ["BIS"],
+                    "MII": ["MII"],
+                    "EXP": ["EXP"],
+                    "TURNOVER": ["FINANCIAL", "TURNOVER", "STATEMENT"],
+                    "MANPOWER": ["MANPOWER"],
+                    "SLA": ["SLA"],
+                    "QUALITY": ["QUALITY"],
+                    "EMD": ["EMD"],
+                    "PAN": ["PAN"],
+                    "GST": ["GST"],
+                    "UDYAM": ["UDYAM"],
+                    "MSME": ["UDYAM", "MSME"],
+                }
+                expected_kws = None
+                for k, v in doc_type_mapping.items():
+                    if k in code_upper:
+                        expected_kws = v
                         break
-                
-                has_doc = matching_doc is not None or len(documents) > 0
-                doc_name = getattr(matching_doc, "file_name", "Uploaded File") if matching_doc else ("Document" if len(documents) > 0 else None)
+
+                if expected_kws:
+                    for doc_type, doc_obj in doc_type_map.items():
+                        if any(k in doc_type for k in expected_kws):
+                            matching_doc = doc_obj
+                            break
+                else:
+                    for doc_type, doc_obj in doc_type_map.items():
+                        if any(k in doc_type for k in ["CERT", "DOC", "STATEMENT", "PROOF", "AUTH"]):
+                            matching_doc = doc_obj
+                            break
+
+                has_doc = matching_doc is not None or (not mandatory)
+                doc_name = getattr(matching_doc, "file_name", "Uploaded File") if matching_doc else None
 
                 eval_result = RuleEvaluator.evaluate_mandatory_document(
                     requirement_id=req_id,
