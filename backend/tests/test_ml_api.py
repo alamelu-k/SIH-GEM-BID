@@ -3,6 +3,18 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
+from app import models
+from app.auth import get_current_officer
+
+officer_user = models.Officer(
+    id=998,
+    email="test.officer@cpcl.gov.in",
+    hashed_password="fake",
+    role="officer",
+    is_active=True,
+)
+app.dependency_overrides[get_current_officer] = lambda: officer_user
+
 client = TestClient(app)
 
 

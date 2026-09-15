@@ -20,12 +20,16 @@ for _candidate in _candidates:
         break
 
 from identify_tender import identify_and_extract
+from app.auth import get_current_officer, require_admin
 
 router = APIRouter(prefix="/tenders", tags=["Tenders & Requirements"])
 
 
 @router.post("/identify", status_code=status.HTTP_200_OK)
-def identify_tender(file: UploadFile = File(...)) -> Dict[str, Any]:
+def identify_tender(
+    file: UploadFile = File(...),
+    current_officer: models.Officer = Depends(get_current_officer),
+) -> Dict[str, Any]:
     """
     Identify a tender document from an uploaded PDF and extract its requirements.
     Read-only operation: no database writes or persistent side effects.
@@ -61,9 +65,13 @@ def identify_tender(file: UploadFile = File(...)) -> Dict[str, Any]:
 
 
 @router.post("", response_model=schemas.TenderResponse, status_code=status.HTTP_201_CREATED)
-def create_tender(tender_in: schemas.TenderCreate, db: Session = Depends(get_db)):
+def create_tender(
+    tender_in: schemas.TenderCreate,
+    db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(require_admin),
+):
     """
-    Ingest a new GeM Tender PDF / specification with its extracted requirements.
+    Ingest a new GeM Tender PDF / specification with its extracted requirements (Admin-only).
     """
     existing = db.query(models.Tender).filter(models.Tender.tender_number == tender_in.tender_number).first()
     if existing:
@@ -104,7 +112,7 @@ def create_tender(tender_in: schemas.TenderCreate, db: Session = Depends(get_db)
         entity_type="TENDER",
         entity_id=db_tender.id,
         action="TENDER_INGESTED",
-        actor="SYSTEM",
+        actor=current_officer.email,
         details={"tender_number": db_tender.tender_number, "requirement_count": len(db_tender.requirements)}
     )
     db.add(audit)
@@ -114,7 +122,12 @@ def create_tender(tender_in: schemas.TenderCreate, db: Session = Depends(get_db)
 
 
 @router.get("", response_model=List[schemas.TenderResponse])
-def list_tenders(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_tenders(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(get_current_officer),
+):
     """
     List all ingested tenders in the system.
     """
@@ -123,7 +136,11 @@ def list_tenders(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
 
 
 @router.get("/{tender_id}", response_model=schemas.TenderResponse)
-def get_tender(tender_id: int, db: Session = Depends(get_db)):
+def get_tender(
+    tender_id: int,
+    db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(get_current_officer),
+):
     """
     Retrieve details and extracted requirements for a specific tender by ID.
     """

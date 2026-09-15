@@ -3,6 +3,19 @@ import uuid
 from fastapi.testclient import TestClient
 from app.main import app
 
+from app import models
+from app.auth import get_current_officer, require_admin
+
+admin_officer = models.Officer(
+    id=999,
+    email="test.admin@cpcl.gov.in",
+    hashed_password="fake",
+    role="admin",
+    is_active=True,
+)
+app.dependency_overrides[get_current_officer] = lambda: admin_officer
+app.dependency_overrides[require_admin] = lambda: admin_officer
+
 client = TestClient(app)
 
 def test_root_health_check():

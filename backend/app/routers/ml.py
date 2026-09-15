@@ -1,5 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app import models
+from app.auth import get_current_officer
 from app.ml.service import DocumentMLService
 from app.schemas import (
     DocumentClassificationRequest,
@@ -19,6 +21,7 @@ router = APIRouter(
 )
 def classify_document_endpoint(
     request: DocumentClassificationRequest,
+    current_officer: models.Officer = Depends(get_current_officer),
 ):
     result = DocumentMLService.classify(request.text)
 

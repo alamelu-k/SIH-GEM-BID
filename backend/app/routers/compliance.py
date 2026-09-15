@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app import models, schemas
+from app.auth import get_current_officer
 from app.services.compliance_service import evaluate_bidder_compliance
 
 router = APIRouter(
-prefix="/compliance",
-tags=["Compliance Verification & Matrix"]
+    prefix="/compliance",
+    tags=["Compliance Verification & Matrix"]
 )
 
 @router.post(
@@ -17,6 +18,7 @@ tags=["Compliance Verification & Matrix"]
 def evaluate_compliance(
     bidder_id: int,
     db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(get_current_officer),
 ):
     try:
         return evaluate_bidder_compliance(
@@ -37,6 +39,7 @@ def evaluate_compliance(
 def get_bidder_compliance(
     bidder_id: int,
     db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(get_current_officer),
 ):
     score = (
         db.query(models.ComplianceScore)

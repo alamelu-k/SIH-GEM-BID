@@ -51,8 +51,8 @@ class Bidder(Base):
     id = Column(Integer, primary_key=True, index=True)
     tender_id = Column(Integer, ForeignKey("tenders.id"), nullable=False)
     legal_name = Column(String(255), nullable=False)
-    pan = Column(String(20), nullable=True, index=True)
-    gstin = Column(String(20), nullable=True, index=True)
+    pan = Column(String(255), nullable=True, index=True)
+    gstin = Column(String(255), nullable=True, index=True)
     udyam_number = Column(String(50), nullable=True, index=True)
     submission_date = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -135,3 +135,19 @@ class AuditLog(Base):
     actor = Column(String(100), default="SYSTEM") # Procurement Officer or SYSTEM
     details = Column(JSON, nullable=True)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class Officer(Base):
+    """
+    Represents a procurement officer / platform user with 2FA OTP authentication.
+    """
+    __tablename__ = "officers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    role = Column(String(50), default="officer")
+    otp_code = Column(String(10), nullable=True)
+    otp_expires_at = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)

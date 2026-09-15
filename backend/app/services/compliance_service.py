@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.encryption import decrypt_field
 from app.rules_engine import RulesEngine
 from app.connectors.mock_connector import MockVerificationConnector
 from app.connectors.base import BidderIdentity, VerificationClaim
@@ -59,8 +60,8 @@ def evaluate_bidder_compliance(
     identity = BidderIdentity(
         bidder_id=bidder.id,
         legal_name=bidder.legal_name,
-        pan=bidder.pan,
-        gstin=bidder.gstin,
+        pan=decrypt_field(bidder.pan),
+        gstin=decrypt_field(bidder.gstin),
         udyam_number=bidder.udyam_number
     )
 

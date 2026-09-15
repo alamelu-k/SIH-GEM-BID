@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.database import engine, Base
 from app.routers import tenders, bidders, compliance, audit, ml
+from app.routers import auth
 
 # Create database tables automatically on startup
 Base.metadata.create_all(bind=engine)
@@ -24,6 +27,10 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
+# Register slowapi rate limiter state and 429 exception handler
+app.state.limiter = auth.limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Set up CORS middleware for Pod 3 React Frontend Integration
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +46,7 @@ app.include_router(bidders.router, prefix=settings.API_V1_STR)
 app.include_router(compliance.router, prefix=settings.API_V1_STR)
 app.include_router(audit.router, prefix=settings.API_V1_STR)
 app.include_router(ml.router, prefix=settings.API_V1_STR)
+app.include_router(auth.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Health Check"])

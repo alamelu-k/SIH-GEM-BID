@@ -3,15 +3,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
+from app.auth import get_current_officer, require_admin
+from app.encryption import encrypt_field, decrypt_field
 from app.ml.service import DocumentMLService
 
 router = APIRouter(prefix="/bidders", tags=["Bidders & Document Submissions"])
 
 
 @router.post("", response_model=schemas.BidderResponse, status_code=status.HTTP_201_CREATED)
-def create_bidder(bidder_in: schemas.BidderCreate, db: Session = Depends(get_db)):
+def create_bidder(
+    bidder_in: schemas.BidderCreate,
+    db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(get_current_officer),
+):
     """
-    Register a bidder for a specific tender.
+    Register a bidder for a specific tender (Officer).
+    Encrypts PAN and GSTIN before persisting to the database.
     """
     tender = db.query(models.Tender).filter(models.Tender.id == bidder_in.tender_id).first()
     if not tender:
@@ -23,8 +30,8 @@ def create_bidder(bidder_in: schemas.BidderCreate, db: Session = Depends(get_db)
     db_bidder = models.Bidder(
         tender_id=bidder_in.tender_id,
         legal_name=bidder_in.legal_name,
-        pan=bidder_in.pan,
-        gstin=bidder_in.gstin,
+        pan=encrypt_field(bidder_in.pan),
+        gstin=encrypt_field(bidder_in.gstin),
         udyam_number=bidder_in.udyam_number
     )
     db.add(db_bidder)
@@ -36,24 +43,42 @@ def create_bidder(bidder_in: schemas.BidderCreate, db: Session = Depends(get_db)
         entity_type="BIDDER",
         entity_id=db_bidder.id,
         action="BIDDER_REGISTERED",
-        actor="SYSTEM",
+        actor=current_officer.email,
         details={"legal_name": db_bidder.legal_name, "tender_id": db_bidder.tender_id}
     )
     db.add(audit)
     db.commit()
 
-    return db_bidder
+    resp = schemas.BidderResponse.model_validate(db_bidder)
+    resp.pan = decrypt_field(resp.pan)
+    resp.gstin = decrypt_field(resp.gstin)
+    return resp
 
 
 @router.get("", response_model=List[schemas.BidderResponse])
-def list_bidders(tender_id: int = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_bidders(
+    tender_id: int = None,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(require_admin),
+):
     """
-    List all bidders, optionally filtered by tender_id.
+    List all bidders, optionally filtered by tender_id (Admin-only).
+    Decrypts PAN and GSTIN for authorized administrator view.
     """
     query = db.query(models.Bidder)
     if tender_id:
         query = query.filter(models.Bidder.tender_id == tender_id)
-    return query.offset(skip).limit(limit).all()
+    bidders = query.offset(skip).limit(limit).all()
+
+    result = []
+    for b in bidders:
+        resp = schemas.BidderResponse.model_validate(b)
+        resp.pan = decrypt_field(resp.pan)
+        resp.gstin = decrypt_field(resp.gstin)
+        result.append(resp)
+    return result
 
 
 @router.post(
@@ -64,11 +89,12 @@ def list_bidders(tender_id: int = None, skip: int = 0, limit: int = 100, db: Ses
 def upload_bidder_document(
     bidder_id: int,
     doc_in: schemas.DocumentBase,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_officer: models.Officer = Depends(get_current_officer),
 ):
     """
     Record an uploaded document and optionally classify its text
-    using the existing ML document classifier.
+    using the existing ML document classifier (Officer).
     """
 
     bidder = (
@@ -141,7 +167,7 @@ def upload_bidder_document(
         entity_type="DOCUMENT",
         entity_id=db_doc.id,
         action="DOCUMENT_UPLOADED",
-        actor="SYSTEM",
+        actor=current_officer.email,
         details={
             "bidder_id": bidder_id,
             "document_type": db_doc.document_type,
