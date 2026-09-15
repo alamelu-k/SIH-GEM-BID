@@ -20,10 +20,10 @@ import { AboutPage } from './screens/AboutPage';
 import { ProfilePage } from './screens/ProfilePage';
 
 function AppContent() {
-  const { currentOfficer, canAccessTender, isAdmin } = useOfficer();
+  const { currentOfficer, canAccessTender, isAdmin, token } = useOfficer();
 
   const [tenders, setTenders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(token));
 
   // Navigation State
   const [activeScreen, setActiveScreen] = useState('my_tenders');
@@ -34,14 +34,26 @@ function AppContent() {
 
   // Load tenders via API abstraction layer
   useEffect(() => {
+    if (!token) {
+      setTenders([]);
+      setLoading(false);
+      return;
+    }
+
     async function loadData() {
       setLoading(true);
-      const data = await tenderApi.getTenders();
-      setTenders(data);
-      setLoading(false);
+      try {
+        const data = await tenderApi.getTenders();
+        setTenders(data);
+      } catch (err) {
+        console.error('Failed to load tenders:', err);
+        setTenders([]);
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
-  }, []);
+  }, [token]);
 
   // Check access whenever active tender or current officer changes
   useEffect(() => {
