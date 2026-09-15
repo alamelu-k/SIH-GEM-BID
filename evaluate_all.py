@@ -81,7 +81,7 @@ def evaluate_bidders(bidders: List[Dict[str, Any]]) -> Tuple[Dict[int, Dict[str,
 
         url = f"{API_BASE_URL}/compliance/evaluate/{bidder_id}"
         try:
-            res = requests.post(url, timeout=20)
+            res = requests.post(url, timeout=90)
             if res.status_code == 200:
                 data = res.json()
                 full_responses[bidder_id] = data

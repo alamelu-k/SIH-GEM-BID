@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
 
 class Settings:
     PROJECT_NAME: str = "CodeVeil - Integrated Bid Compliance Verification Platform"

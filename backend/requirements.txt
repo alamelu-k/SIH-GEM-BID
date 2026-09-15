@@ -9,3 +9,6 @@ pdfplumber>=0.11.0
 pymupdf>=1.24.0
 reportlab>=5.0.0
 anthropic>=0.50.0
+psycopg2-binary>=2.9.0
+python-dotenv>=1.0.0
+

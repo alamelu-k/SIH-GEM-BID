@@ -139,10 +139,9 @@ def evaluate_bidder_compliance(
         )
 
         db.add(db_vr)
-        db.commit()
-        db.refresh(db_vr)
-
         verification_results.append(db_vr)
+
+    db.commit()
 
     # ---------------------------------------------------------
     # 7. Run Rules Engine
