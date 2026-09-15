@@ -1,3 +1,4 @@
+import { apiClient } from './client';
 import { MOCK_TENDERS } from '../mockData/tenders';
 import { MOCK_OFFICERS } from '../mockData/officers';
 
@@ -17,8 +18,8 @@ export const tenderApi = {
    * Fetch all tenders (or filter by officer)
    */
   async getTenders() {
-    await delay();
-    return [...MOCK_TENDERS];
+    const response = await apiClient.get('/tenders');
+    return response.data;
   },
 
   /**
