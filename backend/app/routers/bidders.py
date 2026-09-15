@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
+from app.ml.service import DocumentMLService
 
 router = APIRouter(prefix="/bidders", tags=["Bidders & Document Submissions"])
 
@@ -55,51 +56,103 @@ def list_bidders(tender_id: int = None, skip: int = 0, limit: int = 100, db: Ses
     return query.offset(skip).limit(limit).all()
 
 
-@router.get("/{bidder_id}", response_model=schemas.BidderResponse)
-def get_bidder(bidder_id: int, db: Session = Depends(get_db)):
+@router.post(
+    "/{bidder_id}/documents",
+    response_model=schemas.DocumentResponse,
+    status_code=status.HTTP_201_CREATED
+)
+def upload_bidder_document(
+    bidder_id: int,
+    doc_in: schemas.DocumentBase,
+    db: Session = Depends(get_db)
+):
     """
-    Get detailed information for a specific bidder.
+    Record an uploaded document and optionally classify its text
+    using the existing ML document classifier.
     """
-    bidder = db.query(models.Bidder).filter(models.Bidder.id == bidder_id).first()
+
+    bidder = (
+        db.query(models.Bidder)
+        .filter(models.Bidder.id == bidder_id)
+        .first()
+    )
+
     if not bidder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Bidder ID {bidder_id} not found."
         )
-    return bidder
 
+    # Copy user-provided extracted fields.
+    extracted_fields = dict(doc_in.extracted_fields or {})
 
-@router.post("/{bidder_id}/documents", response_model=schemas.DocumentResponse, status_code=status.HTTP_201_CREATED)
-def upload_bidder_document(bidder_id: int, doc_in: schemas.DocumentBase, db: Session = Depends(get_db)):
-    """
-    Record an uploaded document submission for a bidder.
-    """
-    bidder = db.query(models.Bidder).filter(models.Bidder.id == bidder_id).first()
-    if not bidder:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Bidder ID {bidder_id} not found."
-        )
+    # Run ML classification only when extracted text is provided.
+    if doc_in.extracted_text and doc_in.extracted_text.strip():
+
+        try:
+            ml_result = DocumentMLService.classify(
+                doc_in.extracted_text
+            )
+
+            predicted_type = str(
+                ml_result.document_type.value
+            ).upper()
+
+            confidence = float(
+                ml_result.confidence
+            )
+
+            submitted_type = doc_in.document_type.upper()
+
+            matches = submitted_type == predicted_type
+
+            extracted_fields["ml_classification"] = {
+                "predicted_type": predicted_type,
+                "confidence": confidence,
+                "matches_submitted_type": matches,
+                "status": "MATCH" if matches else "MISMATCH"
+            }
+
+        except Exception as exc:
+            extracted_fields["ml_classification"] = {
+                "status": "ERROR",
+                "message": str(exc)
+            }
+
+    else:
+        extracted_fields["ml_classification"] = {
+            "status": "NOT_PERFORMED",
+            "message": "No extracted text was provided."
+        }
 
     db_doc = models.Document(
         bidder_id=bidder_id,
         document_type=doc_in.document_type,
         file_name=doc_in.file_name,
         file_path=doc_in.file_path,
-        extracted_fields=doc_in.extracted_fields
+        extracted_fields=extracted_fields
     )
+
     db.add(db_doc)
     db.commit()
     db.refresh(db_doc)
 
-    # Audit Log
     audit = models.AuditLog(
         entity_type="DOCUMENT",
         entity_id=db_doc.id,
         action="DOCUMENT_UPLOADED",
         actor="SYSTEM",
-        details={"bidder_id": bidder_id, "document_type": db_doc.document_type, "file_name": db_doc.file_name}
+        details={
+            "bidder_id": bidder_id,
+            "document_type": db_doc.document_type,
+            "file_name": db_doc.file_name,
+            "ml_status": extracted_fields.get(
+                "ml_classification",
+                {}
+            ).get("status")
+        }
     )
+
     db.add(audit)
     db.commit()
 

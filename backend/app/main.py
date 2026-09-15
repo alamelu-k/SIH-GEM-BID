@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
-from app.routers import tenders, bidders, compliance, audit
+from app.routers import tenders, bidders, compliance, audit, ml
 
 # Create database tables automatically on startup
 Base.metadata.create_all(bind=engine)
@@ -38,6 +38,7 @@ app.include_router(tenders.router, prefix=settings.API_V1_STR)
 app.include_router(bidders.router, prefix=settings.API_V1_STR)
 app.include_router(compliance.router, prefix=settings.API_V1_STR)
 app.include_router(audit.router, prefix=settings.API_V1_STR)
+app.include_router(ml.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Health Check"])
