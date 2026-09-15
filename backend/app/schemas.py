@@ -43,6 +43,7 @@ class DocumentBase(BaseModel):
     document_type: str
     file_name: str
     file_path: str
+    extracted_text: Optional[str] = None
     extracted_fields: Optional[Dict[str, Any]] = None
 
 class DocumentCreate(DocumentBase):
@@ -130,3 +131,14 @@ class AuditLogResponse(AuditLogCreate):
     id: int
     timestamp: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# --- ML Document Classification Schemas ---
+
+class DocumentClassificationRequest(BaseModel):
+    text: str
+
+
+class DocumentClassificationResponse(BaseModel):
+    document_type: str
+    confidence: float
