@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import { Shield, User, ChevronDown, UserCheck, KeyRound } from 'lucide-react';
+import React from 'react';
+import { Shield, User, LogOut } from 'lucide-react';
 import { useOfficer } from '../context/OfficerContext';
-import { OfficerSwitcherModal } from './OfficerSwitcherModal';
 
 export const Header = ({ currentScreen, onNavigate }) => {
-  const { currentOfficer, switchOfficer, allOfficers, isAdmin } = useOfficer();
-  const [showModal, setShowModal] = useState(false);
+  const { currentOfficer, token, logout, isAdmin } = useOfficer();
 
   const navItems = [
     { id: 'home', label: 'Home' },
     { id: 'my_tenders', label: 'My Tenders' },
     { id: 'about', label: 'About App' },
-    { id: 'profile', label: 'User Profile' },
-    { id: 'login', label: 'Sign In' }
+    ...(token
+      ? [{ id: 'profile', label: 'User Profile' }]
+      : [{ id: 'login', label: 'Sign In' }]),
   ];
 
   return (
@@ -63,62 +62,56 @@ export const Header = ({ currentScreen, onNavigate }) => {
             })}
           </nav>
 
-          {/* Right Action: Mock Officer Switcher (Visible Access Control Core Feature) */}
+          {/* Right Action Area */}
           <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden xl:flex flex-col text-right">
-              <div className="text-xs font-semibold text-slate-200 flex items-center justify-end gap-1.5">
-                <span>{currentOfficer.name}</span>
-                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
-                  isAdmin ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' : 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
-                }`}>
-                  {currentOfficer.role}
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400 truncate max-w-[180px]">
-                {currentOfficer.department}
-              </div>
-            </div>
+            {token ? (
+              <>
+                <div className="hidden sm:flex flex-col text-right">
+                  <div className="text-xs font-semibold text-slate-200 flex items-center justify-end gap-1.5">
+                    <span className="font-mono text-slate-300">{currentOfficer?.email}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                      isAdmin
+                        ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+                        : 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
+                    }`}>
+                      {currentOfficer?.role}
+                    </span>
+                  </div>
+                </div>
 
-            {/* User Profile Quick Access Icon */}
-            <button
-              onClick={() => onNavigate('profile')}
-              className={`p-2 rounded-lg border text-xs font-medium transition-all ${
-                currentScreen === 'profile'
-                  ? 'bg-blue-600 border-blue-500 text-white'
-                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
-              }`}
-              title="View User Profile"
-            >
-              <User className="w-4 h-4" />
-            </button>
+                <button
+                  onClick={() => onNavigate('profile')}
+                  className={`p-2 rounded-lg border text-xs font-medium transition-all ${
+                    currentScreen === 'profile'
+                      ? 'bg-blue-600 border-blue-500 text-white'
+                      : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
+                  }`}
+                  title="View User Profile"
+                >
+                  <User className="w-4 h-4" />
+                </button>
 
-            {/* Switch Officer Button (Opens modal for clear demo view) */}
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 bg-blue-950/60 hover:bg-blue-900 border border-blue-700/50 hover:border-blue-500 rounded-md px-3 py-1.5 transition-all text-xs font-medium text-blue-100 shadow-sm"
-              title="Switch Officer Desk to test Tender-Wise Access Control"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden lg:inline">Switch Desk</span>
-              <span className="lg:hidden font-mono">{currentOfficer.officer_id}</span>
-            </button>
-
-            {/* Quick dropdown for rapid switching */}
-            <div className="relative hidden lg:block">
-              <select
-                value={currentOfficer.officer_id}
-                onChange={(e) => switchOfficer(e.target.value)}
-                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-200 cursor-pointer focus:outline-none pr-6"
-                aria-label="Quick Select Officer"
+                <button
+                  onClick={() => {
+                    logout();
+                    onNavigate('login');
+                  }}
+                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-red-950/60 hover:text-red-300 hover:border-red-700/50 border border-slate-700 rounded-lg px-2.5 py-1.5 transition-all text-xs font-medium text-slate-300 shadow-sm"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => onNavigate('login')}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-all"
               >
-                {allOfficers.map((officer) => (
-                  <option key={officer.officer_id} value={officer.officer_id} className="bg-slate-800 text-slate-100">
-                    {officer.name} ({officer.role === 'ADMIN' ? 'ADMIN' : officer.officer_id})
-                  </option>
-                ))}
-              </select>
-            </div>
-
+                <User className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
+            )}
           </div>
 
         </div>
@@ -143,12 +136,7 @@ export const Header = ({ currentScreen, onNavigate }) => {
           })}
         </div>
       </header>
-
-      {/* Interactive Modal */}
-      <OfficerSwitcherModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-      />
     </>
   );
 };
+

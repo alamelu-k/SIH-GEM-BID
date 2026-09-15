@@ -3,13 +3,65 @@ import { MOCK_OFFICERS } from '../mockData/officers';
 
 const OfficerContext = createContext();
 
+function decodeJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (err) {
+    return null;
+  }
+}
+
 export const OfficerProvider = ({ children }) => {
-  // Default to first procurement officer for demo
+  const [token, setToken] = useState(() => localStorage.getItem('codeveil_token'));
+  
   const [currentOfficer, setCurrentOfficer] = useState(() => {
+    const savedToken = localStorage.getItem('codeveil_token');
+    if (savedToken) {
+      const payload = decodeJwt(savedToken);
+      if (payload && payload.exp * 1000 > Date.now()) {
+        return {
+          officer_id: payload.officer_id,
+          email: payload.sub,
+          role: (payload.role || 'officer').toUpperCase(),
+          name: payload.sub.split('@')[0],
+        };
+      }
+    }
     const saved = localStorage.getItem('codeveil_officer_id');
     const found = MOCK_OFFICERS.find(o => o.officer_id === saved);
     return found || MOCK_OFFICERS[0];
   });
+
+  const login = (accessToken) => {
+    localStorage.setItem('codeveil_token', accessToken);
+    setToken(accessToken);
+    const payload = decodeJwt(accessToken);
+    if (payload) {
+      const officerData = {
+        officer_id: payload.officer_id,
+        email: payload.sub,
+        role: (payload.role || 'officer').toUpperCase(),
+        name: payload.sub.split('@')[0],
+      };
+      setCurrentOfficer(officerData);
+      localStorage.setItem('codeveil_officer_id', String(payload.officer_id));
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('codeveil_token');
+    localStorage.removeItem('codeveil_officer_id');
+    setToken(null);
+    setCurrentOfficer(MOCK_OFFICERS[0]);
+  };
 
   const switchOfficer = (officerId) => {
     const found = MOCK_OFFICERS.find(o => o.officer_id === officerId);
@@ -19,27 +71,22 @@ export const OfficerProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Check if the current officer is authorized to view the given tender.
-   * Admin can view all tenders.
-   * Procurement officer can only view if assigned_officer_id matches.
-   * 
-   * NOTE: This is a frontend-only simulation for demo purposes.
-   * Real backend enforcement will return HTTP 403 Forbidden regardless of frontend state.
-   */
   const canAccessTender = (tender) => {
     if (!tender) return false;
-    if (currentOfficer.role === 'ADMIN') return true;
-    return tender.assigned_officer_id === currentOfficer.officer_id;
+    if (currentOfficer?.role === 'ADMIN') return true;
+    return tender.assigned_officer_id === currentOfficer?.officer_id;
   };
 
   return (
     <OfficerContext.Provider
       value={{
+        token,
+        login,
+        logout,
         currentOfficer,
         switchOfficer,
         allOfficers: MOCK_OFFICERS,
-        isAdmin: currentOfficer.role === 'ADMIN',
+        isAdmin: currentOfficer?.role === 'ADMIN',
         canAccessTender,
       }}
     >
@@ -55,3 +102,4 @@ export const useOfficer = () => {
   }
   return context;
 };
+
